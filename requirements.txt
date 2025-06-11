@@ -1,16 +1,36 @@
-comtypes==1.4.10
-PyAudio==0.2.14
-pypiwin32==223
-pyttsx3==2.98
-pywin32==308
-SpeechRecognition==3.14.1
-typing_extensions==4.12.2
+# comtypes==1.4.10
+# PyAudio==0.2.14
+# pypiwin32==223
+# pyttsx3==2.98
+# pywin32==308
+# SpeechRecognition==3.14.1
+# typing_extensions==4.12.2
+# streamlit==1.36.0
+# pandas==2.2.0
+# pydub==0.25.1
+# python-dotenv==1.0.1
+# watchdog==4.0.0
+# streamlit-webrtc==0.47.1
+# numpy>=1.24.0
+# ffmpeg-python==0.2.0
+
+# Core dependencies
 streamlit==1.36.0
-pandas==2.2.0
+pandas<2.0.0  # For Python 3.9 compatibility
+numpy>=1.24.0,<2.0.0  # For Python 3.9 compatibility
 pydub==0.25.1
 python-dotenv==1.0.1
-watchdog==4.0.0
-streamlit-webrtc==0.47.1
-numpy>=1.24.0
-ffmpeg-python==0.2.0
+watchdog<3.0.0  # For better compatibility
 
+# Audio processing
+SpeechRecognition==3.10.0
+
+# Only install Windows-specific packages on Windows
+pypiwin32==223; sys_platform == 'win32'
+pywin32==308; sys_platform == 'win32'
+comtypes==1.4.10; sys_platform == 'win32'
+pyttsx3==2.98; sys_platform == 'win32'
+PyAudio==0.2.13; sys_platform == 'win32'  # Only install on Windows
+
+# For Linux environments like Streamlit Cloud
+# This is a placeholder for Streamlit Cloud - it won't use PyAudio

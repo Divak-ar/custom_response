@@ -1,17 +1,32 @@
 import speech_recognition as sr
 import os
 import time
-import wave
-import pyaudio
-import re
 import threading
+import re
+import sys
 from email_sender import EmailSender
+
+# Conditionally import audio playback libraries
+try:
+    import wave
+    import pyaudio
+    AUDIO_PLAYBACK_AVAILABLE = True
+except ImportError:
+    AUDIO_PLAYBACK_AVAILABLE = False
+    print("Warning: Audio playback libraries not available")
 
 class VoiceListener:
     def __init__(self, trigger_phrases=None, response_audio_path=None, trigger_count=3, 
                  email_config=None, phrase_time_limit=5):
         self.recognizer = sr.Recognizer()
-        self.microphone = sr.Microphone()
+        try:
+            self.microphone = sr.Microphone()
+            self.mic_available = True
+        except OSError:
+            print("Warning: Microphone not available")
+            self.microphone = None
+            self.mic_available = False
+
         self._running = False
         self._thread = None
         
@@ -33,13 +48,21 @@ class VoiceListener:
             print(f"Warning: Response audio file '{self.response_audio_path}' not found.")
 
     def adjust_for_ambient_noise(self):
+        if not self.mic_available:
+            print("Cannot adjust for ambient noise: microphone not available")
+            return
+            
         with self.microphone as source:
             print("Adjusting for ambient noise. Please remain silent...")
             self.recognizer.adjust_for_ambient_noise(source, duration=1)
             print("Adjustment complete.")
 
     def play_audio_response(self):
-        if not self.response_audio_path:
+        if not self.response_audio_path or not os.path.exists(self.response_audio_path):
+            return
+            
+        if not AUDIO_PLAYBACK_AVAILABLE:
+            print("Cannot play audio: playback libraries not available")
             return
             
         try:
@@ -77,6 +100,11 @@ class VoiceListener:
         return self.current_trigger_count
 
     def listen_for_triggers(self, duration_mins=60):
+        if not self.mic_available:
+            print("Cannot listen: microphone not available")
+            self._running = False
+            return
+            
         self.adjust_for_ambient_noise()
         
         end_time = time.time() + duration_mins * 60  # Convert minutes to seconds
